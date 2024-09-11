@@ -3,9 +3,11 @@ package com.pdharam.restaurantapp_kotlincompose
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
@@ -13,8 +15,10 @@ class RestaurantViewModel(
     private val stateHandle: SavedStateHandle
 ) : ViewModel() {
     private var restInterface: RestaurantsApiService
-    private lateinit var call: Call<List<Restaurant>>
     val state = mutableStateOf(emptyList<Restaurant>())
+    val coroutineExceptionHandler = CoroutineExceptionHandler { coroutineContext, throwable ->
+        throwable.printStackTrace()
+    }
 
     init {
         val retrofit = Retrofit.Builder()
@@ -26,21 +30,26 @@ class RestaurantViewModel(
     }
 
     private fun getRestaurants() {
-        call = restInterface.getRestaurants()
-        call.enqueue(object : Callback<List<Restaurant>> {
-            override fun onResponse(
-                call: Call<List<Restaurant>>,
-                response: Response<List<Restaurant>>
-            ) {
-                response.body()?.let { restaurants ->
-                    state.value = restaurants.restoreSelection()
-                }
-            }
 
-            override fun onFailure(call: Call<List<Restaurant>>, t: Throwable) {
-                t.printStackTrace()
-            }
-        })
+        viewModelScope.launch(coroutineExceptionHandler) {
+
+            val restaurants = getRemoteRestaurants()
+            state.value = restaurants.restoreSelection()
+
+        }
+
+    }
+
+    private suspend fun getRemoteRestaurants(): List<Restaurant> {
+        return withContext(Dispatchers.IO) {
+            restInterface.getRestaurants()
+        }
+
+        /* NOTE:
+        For Retrofit interface calls such as restInterface.getRestaurants(),
+        we can skip wrapping them in withContext() blocks because Retrofit already does this behind the scenes
+        and sets the Dispatchers.IO dispatcher for all suspending methods from within its interface.
+        * */
     }
 
     fun toggleFavourite(id: Int) {
@@ -85,8 +94,4 @@ class RestaurantViewModel(
         const val FAVOURITE = "favourite"
     }
 
-    override fun onCleared() {
-        super.onCleared()
-        call.cancel()
-    }
 }
