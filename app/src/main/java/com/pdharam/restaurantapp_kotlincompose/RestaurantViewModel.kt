@@ -3,11 +3,45 @@ package com.pdharam.restaurantapp_kotlincompose
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 
-class RestaurantViewModel(private val stateHandle: SavedStateHandle) : ViewModel() {
+class RestaurantViewModel(
+    private val stateHandle: SavedStateHandle
+) : ViewModel() {
+    private var restInterface: RestaurantsApiService
+    private lateinit var call: Call<List<Restaurant>>
+    val state = mutableStateOf(emptyList<Restaurant>())
 
-    val state = mutableStateOf(dummyRestaurants.restoreSelection())
+    init {
+        val retrofit = Retrofit.Builder()
+            .addConverterFactory(GsonConverterFactory.create())
+            .baseUrl("https://fir-project-s-default-rtdb.firebaseio.com/")
+            .build()
+        restInterface = retrofit.create(RestaurantsApiService::class.java)
+        getRestaurants()
+    }
 
+    private fun getRestaurants() {
+        call = restInterface.getRestaurants()
+        call.enqueue(object : Callback<List<Restaurant>> {
+            override fun onResponse(
+                call: Call<List<Restaurant>>,
+                response: Response<List<Restaurant>>
+            ) {
+                response.body()?.let { restaurants ->
+                    state.value = restaurants.restoreSelection()
+                }
+            }
+
+            override fun onFailure(call: Call<List<Restaurant>>, t: Throwable) {
+                t.printStackTrace()
+            }
+        })
+    }
 
     fun toggleFavourite(id: Int) {
         //take mutable list
@@ -49,5 +83,10 @@ class RestaurantViewModel(private val stateHandle: SavedStateHandle) : ViewModel
 
     companion object {
         const val FAVOURITE = "favourite"
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        call.cancel()
     }
 }
