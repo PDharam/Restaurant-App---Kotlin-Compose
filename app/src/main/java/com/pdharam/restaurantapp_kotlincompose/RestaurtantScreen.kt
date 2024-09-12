@@ -41,6 +41,13 @@ fun DefaultPreview() {
 fun RestaurantsScreen(modifier: Modifier = Modifier) {
     val viewModel: RestaurantViewModel = viewModel()
 
+    /*commented this due to don't need any more - we are calling API through init{} block of viewmodel.
+    This launchedEffect useful when we don't want to call some code on recomposition just only one while initial composition happens
+     */
+//    LaunchedEffect(key1 = "request_restaurant") {
+//        viewModel.getRestaurants()
+//    }
+
     LazyColumn(
         contentPadding = PaddingValues(
             vertical = 8.dp, horizontal = 8.dp
