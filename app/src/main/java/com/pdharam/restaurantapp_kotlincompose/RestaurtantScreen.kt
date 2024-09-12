@@ -22,25 +22,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.pdharam.restaurantapp_kotlincompose.ui.theme.RestaurantAppKotlinComposeTheme
 
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview() {
-
-    RestaurantAppKotlinComposeTheme {
-        RestaurantsScreen()
-    }
-
-}
 
 @Composable
-fun RestaurantsScreen(modifier: Modifier = Modifier) {
+fun RestaurantsScreen(modifier: Modifier = Modifier, onItemClick: (id: Int) -> Unit) {
     val viewModel: RestaurantViewModel = viewModel()
-
     /*commented this due to don't need any more - we are calling API through init{} block of viewmodel.
     This launchedEffect useful when we don't want to call some code on recomposition just only one while initial composition happens
      */
@@ -54,9 +42,10 @@ fun RestaurantsScreen(modifier: Modifier = Modifier) {
         )
     ) {
         items(viewModel.state.value) { restaurant ->
-            RestaurantItem(item = restaurant) { id ->
-                viewModel.toggleFavourite(id)
-            }
+            RestaurantItem(
+                item = restaurant,
+                onFavouriteClick = { id -> viewModel.toggleFavourite(id) },
+                onItemClick = { id -> onItemClick(id) })
         }
     }
 
@@ -64,7 +53,11 @@ fun RestaurantsScreen(modifier: Modifier = Modifier) {
 
 
 @Composable
-fun RestaurantItem(item: Restaurant, onClick: (id: Int) -> Unit) {
+private fun RestaurantItem(
+    item: Restaurant,
+    onFavouriteClick: (id: Int) -> Unit,
+    onItemClick: (id: Int) -> Unit
+) {
 
     val favouriteIcon = if (item.isFavourite) {
         Icons.Filled.Favorite
@@ -75,6 +68,7 @@ fun RestaurantItem(item: Restaurant, onClick: (id: Int) -> Unit) {
         modifier = Modifier
             .padding(8.dp)
             .fillMaxWidth()
+            .clickable { onItemClick(item.id) }
     ) {
 
         Row(
@@ -95,7 +89,7 @@ fun RestaurantItem(item: Restaurant, onClick: (id: Int) -> Unit) {
 
             )
             RestaurantIcon(favouriteIcon, Modifier.weight(0.15f)) {
-                onClick(item.id)
+                onFavouriteClick(item.id)
             }
         }
     }
@@ -103,8 +97,13 @@ fun RestaurantItem(item: Restaurant, onClick: (id: Int) -> Unit) {
 
 
 @Composable
-fun RestaurantDetails(title: String, description: String, modifier: Modifier) {
-    Column(modifier = modifier) {
+fun RestaurantDetails(
+    title: String,
+    description: String,
+    modifier: Modifier,
+    horizontalAlignment: Alignment.Horizontal = Alignment.Start
+) {
+    Column(modifier = modifier, horizontalAlignment = horizontalAlignment) {
         Text(
             text = title, style = MaterialTheme.typography.titleMedium
         )
