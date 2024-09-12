@@ -1,30 +1,30 @@
 package com.pdharam.restaurantapp_kotlincompose
 
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import retrofit2.HttpException
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.net.ConnectException
+import java.net.UnknownHostException
 
-class RestaurantViewModel(
-    private val stateHandle: SavedStateHandle
-) : ViewModel() {
+class RestaurantViewModel : ViewModel() {
     private var restInterface: RestaurantsApiService
+    private val restaurantDao: RestaurantDao =
+        RestaurantDb.getDaoInstance(RestaurantApplication.getAppContext())
     val state = mutableStateOf(emptyList<Restaurant>())
     val coroutineExceptionHandler = CoroutineExceptionHandler { coroutineContext, throwable ->
         throwable.printStackTrace()
     }
 
     init {
-        val retrofit = Retrofit.Builder()
-            .addConverterFactory(GsonConverterFactory.create())
-            .baseUrl("https://fir-project-s-default-rtdb.firebaseio.com/")
-            .build()
+        val retrofit = Retrofit.Builder().addConverterFactory(GsonConverterFactory.create())
+            .baseUrl("https://fir-project-s-default-rtdb.firebaseio.com/").build()
         restInterface = retrofit.create(RestaurantsApiService::class.java)
         getRestaurants()
     }
@@ -32,17 +32,31 @@ class RestaurantViewModel(
     private fun getRestaurants() {
 
         viewModelScope.launch(coroutineExceptionHandler) {
-
-            val restaurants = getRemoteRestaurants()
-            state.value = restaurants.restoreSelection()
+            state.value = getAllRestaurant()
 
         }
 
     }
 
-    private suspend fun getRemoteRestaurants(): List<Restaurant> {
+    private suspend fun getAllRestaurant(): List<Restaurant> {
         return withContext(Dispatchers.IO) {
-            restInterface.getRestaurants()
+            try {
+                refreshCache()
+            } catch (e: Exception) {
+                when (e) {
+                    is UnknownHostException, is ConnectException, is HttpException -> if (restaurantDao.getAll()
+                            .isEmpty()
+                    ) {
+                        throw Exception(
+                            "Something went wrong" + "We have no data"
+                        )
+                    }
+
+                    else -> throw e
+                }
+            }
+
+            return@withContext restaurantDao.getAll()
         }
 
         /* NOTE:
@@ -52,46 +66,31 @@ class RestaurantViewModel(
         * */
     }
 
-    fun toggleFavourite(id: Int) {
-        //take mutable list
-        val restaurantList = state.value.toMutableList()
-        //find index based on id property
-        val itemIndex = restaurantList.indexOfFirst { it.id == id }
-        //take particular item using received index
-        val item = restaurantList[itemIndex]
-        //update item using item.copy
-        restaurantList[itemIndex] = item.copy(isFavourite = !item.isFavourite)
-        storeSelection(restaurantList[itemIndex])
-        //finally update the state
-        state.value = restaurantList
+    private suspend fun refreshCache() {
+        val restaurants = restInterface.getRestaurants()
+        val favouriteRestaurants = restaurantDao.getAllFavorite()
+        restaurantDao.insertAll(restaurants)
+        restaurantDao.updateAll(favouriteRestaurants.map {
+            PartialRestaurant(
+                it.id, it.isFavourite
+            )
+        })
     }
 
-    private fun storeSelection(item: Restaurant) {
-        //Take list of id's if list not available return  empty list - type mutable so we can update it.
-        val savedToggled = stateHandle.get<List<Int>>(FAVOURITE).orEmpty().toMutableList()
-        //If item is favourite then add into savedToggled list otherwise removed it from list.
-        if (item.isFavourite) savedToggled.add(item.id) else savedToggled.remove(item.id)
-        //Set updated list again in stateHandle obj.
-        stateHandle[FAVOURITE] = savedToggled
-    }
-
-    private fun List<Restaurant>.restoreSelection(): List<Restaurant> {
-        stateHandle.get<List<Int>>(FAVOURITE)?.let { selectedIds ->
-            val restaurantMap = this.associateBy { it.id }
-
-            selectedIds.forEach { id ->
-                restaurantMap[id]?.isFavourite = true
-            }
-
-            return restaurantMap.values.toList()
-
+    fun toggleFavourite(id: Int, oldValue: Boolean) {
+        //cache this field in local database (ROOM -> SQLite)
+        viewModelScope.launch(coroutineExceptionHandler) {
+            val restaurants = toggleFavouriteRestaurant(id, oldValue)
+            state.value = restaurants
         }
-
-        return this
     }
 
-    companion object {
-        const val FAVOURITE = "favourite"
+    private suspend fun toggleFavouriteRestaurant(id: Int, oldValue: Boolean): List<Restaurant> {
+        return withContext(Dispatchers.IO) {
+            restaurantDao.update(PartialRestaurant(id, !oldValue))
+            restaurantDao.getAll()
+        }
     }
+
 
 }

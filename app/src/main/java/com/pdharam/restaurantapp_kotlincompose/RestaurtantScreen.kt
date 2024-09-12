@@ -44,7 +44,7 @@ fun RestaurantsScreen(modifier: Modifier = Modifier, onItemClick: (id: Int) -> U
         items(viewModel.state.value) { restaurant ->
             RestaurantItem(
                 item = restaurant,
-                onFavouriteClick = { id -> viewModel.toggleFavourite(id) },
+                onFavouriteClick = { id, oldValue -> viewModel.toggleFavourite(id, oldValue) },
                 onItemClick = { id -> onItemClick(id) })
         }
     }
@@ -55,7 +55,7 @@ fun RestaurantsScreen(modifier: Modifier = Modifier, onItemClick: (id: Int) -> U
 @Composable
 private fun RestaurantItem(
     item: Restaurant,
-    onFavouriteClick: (id: Int) -> Unit,
+    onFavouriteClick: (id: Int, oldValue: Boolean) -> Unit,
     onItemClick: (id: Int) -> Unit
 ) {
 
@@ -89,7 +89,7 @@ private fun RestaurantItem(
 
             )
             RestaurantIcon(favouriteIcon, Modifier.weight(0.15f)) {
-                onFavouriteClick(item.id)
+                onFavouriteClick(item.id, item.isFavourite)
             }
         }
     }
