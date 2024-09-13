@@ -1,4 +1,4 @@
-package com.pdharam.restaurantapp_kotlincompose
+package com.pdharam.restaurantapp_kotlincompose.restaurants.presentation.list
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -25,21 +25,31 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import com.pdharam.restaurantapp_kotlincompose.restaurants.domain.model.Restaurant
+import com.pdharam.restaurantapp_kotlincompose.ui.theme.RestaurantAppKotlinComposeTheme
 
+@Preview
+@Composable
+fun DefaultPreview(modifier: Modifier = Modifier) {
+    RestaurantAppKotlinComposeTheme {
+        RestaurantsScreen(
+            state = RestaurantScreenState(listOf(), false),
+            onItemClick = {},
+            onFavouriteClick = { _, _ -> })
+    }
+
+}
 
 @Composable
-fun RestaurantsScreen(modifier: Modifier = Modifier, onItemClick: (id: Int) -> Unit) {
-    val viewModel: RestaurantViewModel = viewModel()
-    /*commented this due to don't need any more - we are calling API through init{} block of viewmodel.
-    This launchedEffect useful when we don't want to call some code on recomposition just only one while initial composition happens
-     */
-//    LaunchedEffect(key1 = "request_restaurant") {
-//        viewModel.getRestaurants()
-//    }
+fun RestaurantsScreen(
+    modifier: Modifier = Modifier,
+    state: RestaurantScreenState,
+    onItemClick: (id: Int) -> Unit,
+    onFavouriteClick: (id: Int, oldValue: Boolean) -> Unit
+) {
 
-    val state = viewModel.state.value
 
     Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
         LazyColumn(
@@ -50,7 +60,7 @@ fun RestaurantsScreen(modifier: Modifier = Modifier, onItemClick: (id: Int) -> U
             items(state.restaurants) { item: Restaurant ->
                 RestaurantItem(
                     item = item,
-                    onFavouriteClick = { id, oldValue -> viewModel.toggleFavourite(id, oldValue) },
+                    onFavouriteClick = { id, oldValue -> onFavouriteClick(id, oldValue) },
                     onItemClick = { id -> onItemClick(id) })
             }
         }
