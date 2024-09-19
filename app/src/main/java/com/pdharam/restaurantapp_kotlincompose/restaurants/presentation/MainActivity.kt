@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -21,8 +21,9 @@ import com.pdharam.restaurantapp_kotlincompose.restaurants.presentation.details.
 import com.pdharam.restaurantapp_kotlincompose.restaurants.presentation.list.RestaurantViewModel
 import com.pdharam.restaurantapp_kotlincompose.restaurants.presentation.list.RestaurantsScreen
 import com.pdharam.restaurantapp_kotlincompose.ui.theme.RestaurantAppKotlinComposeTheme
+import dagger.hilt.android.AndroidEntryPoint
 
-
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,7 +43,7 @@ class MainActivity : ComponentActivity() {
 
         NavHost(navController = navController, startDestination = "restaurants") {
             composable(route = "restaurants") {
-                val viewModel: RestaurantViewModel = viewModel()
+                val viewModel: RestaurantViewModel = hiltViewModel()
 
                 RestaurantsScreen(
                     state = viewModel.state.value,
@@ -60,8 +61,8 @@ class MainActivity : ComponentActivity() {
                 val id = navStackEntry.arguments?.getInt("restaurant_id")
                 //We will not use this id but instead of this we will get this from SavedStateHandle obj - inside direct in ViewModel
                 //Behind the scenes, the Navigation component saves the navigation arguments stored in NavStackEntry into SavedStateHandle,
-                val viewModel: RestaurantDetailsViewModel = viewModel()
-                RestaurantDetailsScreen(item = viewModel.state.value)
+                val viewModel: RestaurantDetailsViewModel = hiltViewModel()
+                RestaurantDetailsScreen(state = viewModel.state.value)
             }
         }
 
