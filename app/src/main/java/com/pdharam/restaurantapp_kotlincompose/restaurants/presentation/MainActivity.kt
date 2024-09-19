@@ -1,4 +1,4 @@
-package com.pdharam.restaurantapp_kotlincompose
+package com.pdharam.restaurantapp_kotlincompose.restaurants.presentation
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -9,12 +9,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
+import com.pdharam.restaurantapp_kotlincompose.restaurants.presentation.details.RestaurantDetailsScreen
+import com.pdharam.restaurantapp_kotlincompose.restaurants.presentation.details.RestaurantDetailsViewModel
+import com.pdharam.restaurantapp_kotlincompose.restaurants.presentation.list.RestaurantViewModel
+import com.pdharam.restaurantapp_kotlincompose.restaurants.presentation.list.RestaurantsScreen
 import com.pdharam.restaurantapp_kotlincompose.ui.theme.RestaurantAppKotlinComposeTheme
 
 
@@ -37,9 +42,12 @@ class MainActivity : ComponentActivity() {
 
         NavHost(navController = navController, startDestination = "restaurants") {
             composable(route = "restaurants") {
-                RestaurantsScreen { id ->
-                    navController.navigate("restaurants/$id")
-                }
+                val viewModel: RestaurantViewModel = viewModel()
+
+                RestaurantsScreen(
+                    state = viewModel.state.value,
+                    onItemClick = { id -> navController.navigate("restaurants/$id") },
+                    onFavouriteClick = { id, oldValue -> viewModel.toggleFavourite(id, oldValue) })
             }
             composable(
                 route = "restaurants/{restaurant_id}",
@@ -52,7 +60,8 @@ class MainActivity : ComponentActivity() {
                 val id = navStackEntry.arguments?.getInt("restaurant_id")
                 //We will not use this id but instead of this we will get this from SavedStateHandle obj - inside direct in ViewModel
                 //Behind the scenes, the Navigation component saves the navigation arguments stored in NavStackEntry into SavedStateHandle,
-                RestaurantDetailsScreen()
+                val viewModel: RestaurantDetailsViewModel = viewModel()
+                RestaurantDetailsScreen(item = viewModel.state.value)
             }
         }
 

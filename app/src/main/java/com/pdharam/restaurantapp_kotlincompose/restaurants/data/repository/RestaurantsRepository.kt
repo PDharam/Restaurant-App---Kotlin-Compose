@@ -1,5 +1,12 @@
-package com.pdharam.restaurantapp_kotlincompose
+package com.pdharam.restaurantapp_kotlincompose.restaurants.data.repository
 
+import com.pdharam.restaurantapp_kotlincompose.RestaurantApplication
+import com.pdharam.restaurantapp_kotlincompose.restaurants.data.data_source.local.LocalRestaurant
+import com.pdharam.restaurantapp_kotlincompose.restaurants.data.data_source.local.PartialLocalRestaurant
+import com.pdharam.restaurantapp_kotlincompose.restaurants.data.data_source.local.RestaurantDao
+import com.pdharam.restaurantapp_kotlincompose.restaurants.data.data_source.local.RestaurantDb
+import com.pdharam.restaurantapp_kotlincompose.restaurants.data.data_source.remote.RestaurantsApiService
+import com.pdharam.restaurantapp_kotlincompose.restaurants.domain.model.Restaurant
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import retrofit2.HttpException
@@ -19,7 +26,7 @@ class RestaurantsRepository {
         restInterface = retrofit.create(RestaurantsApiService::class.java)
     }
 
-    suspend fun getAllRestaurant(): List<Restaurant> {
+    suspend fun loadRestaurants() {
         return withContext(Dispatchers.IO) {
             try {
                 refreshCache()
@@ -36,8 +43,6 @@ class RestaurantsRepository {
                     else -> throw e
                 }
             }
-
-            return@withContext restaurantDao.getAll()
         }
 
         /* NOTE:
@@ -48,21 +53,40 @@ class RestaurantsRepository {
     }
 
     private suspend fun refreshCache() {
-        val restaurants = restInterface.getRestaurants()
+        val remoteRestaurants = restInterface.getRestaurants()
         val favouriteRestaurants = restaurantDao.getAllFavorite()
-        restaurantDao.insertAll(restaurants)
+        restaurantDao.insertAll(remoteRestaurants.map {
+            LocalRestaurant(
+                id = it.id,
+                title = it.title,
+                description = it.description,
+                isFavourite = false
+            )
+        })
         restaurantDao.updateAll(favouriteRestaurants.map {
-            PartialRestaurant(
+            PartialLocalRestaurant(
                 it.id, it.isFavourite
             )
         })
     }
 
-
-    suspend fun toggleFavouriteRestaurant(id: Int, oldValue: Boolean): List<Restaurant> {
+    suspend fun getRestaurants(): List<Restaurant> {
         return withContext(Dispatchers.IO) {
-            restaurantDao.update(PartialRestaurant(id, !oldValue))
-            restaurantDao.getAll()
+            return@withContext restaurantDao.getAll().map {
+                Restaurant(
+                    id = it.id,
+                    title = it.title,
+                    description = it.description,
+                    isFavourite = it.isFavourite
+                )
+            }
+        }
+    }
+
+
+    suspend fun toggleFavouriteRestaurant(id: Int, isFav: Boolean) {
+        return withContext(Dispatchers.IO) {
+            restaurantDao.update(PartialLocalRestaurant(id, isFav))
         }
     }
 

@@ -1,20 +1,23 @@
-package com.pdharam.restaurantapp_kotlincompose
+package com.pdharam.restaurantapp_kotlincompose.restaurants.presentation.list
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.pdharam.restaurantapp_kotlincompose.restaurants.domain.usecase.GetInitialRestaurantsUseCase
+import com.pdharam.restaurantapp_kotlincompose.restaurants.domain.usecase.ToggleRestaurantUseCase
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.launch
 
 class RestaurantViewModel : ViewModel() {
-    private val repository = RestaurantsRepository()
+    val getInitialRestaurantsUseCase = GetInitialRestaurantsUseCase()
+    val toggleRestaurantUseCase = ToggleRestaurantUseCase()
     private val _state =
         mutableStateOf(RestaurantScreenState(restaurants = listOf(), isLoading = true))
     val state: State<RestaurantScreenState>
         get() = _state
 
-    private val coroutineExceptionHandler = CoroutineExceptionHandler { _, throwable ->
+    val coroutineExceptionHandler = CoroutineExceptionHandler { coroutineContext, throwable ->
         _state.value = _state.value.copy(error = throwable.message, isLoading = false)
         throwable.printStackTrace()
     }
@@ -26,7 +29,7 @@ class RestaurantViewModel : ViewModel() {
     private fun getRestaurants() {
 
         viewModelScope.launch(coroutineExceptionHandler) {
-            val restaurants = repository.getAllRestaurant()
+            val restaurants = getInitialRestaurantsUseCase()
             _state.value = _state.value.copy(restaurants = restaurants, isLoading = false)
 
         }
@@ -36,7 +39,7 @@ class RestaurantViewModel : ViewModel() {
     fun toggleFavourite(id: Int, oldValue: Boolean) {
         //cache this field in local database (ROOM -> SQLite)
         viewModelScope.launch(coroutineExceptionHandler) {
-            val updatedList = repository.toggleFavouriteRestaurant(id, oldValue)
+            val updatedList = toggleRestaurantUseCase(id, oldValue)
             _state.value = _state.value.copy(restaurants = updatedList)
         }
     }

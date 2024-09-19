@@ -1,4 +1,4 @@
-package com.pdharam.restaurantapp_kotlincompose
+package com.pdharam.restaurantapp_kotlincompose.restaurants.data.data_source.local
 
 import android.content.Context
 import androidx.room.Database
@@ -6,7 +6,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import kotlin.concurrent.Volatile
 
-@Database(version = 2, entities = [Restaurant::class], exportSchema = false)
+@Database(version = 3, entities = [LocalRestaurant::class], exportSchema = false)
 abstract class RestaurantDb : RoomDatabase() {
     abstract val restaurantDao: RestaurantDao
 

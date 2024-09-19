@@ -1,4 +1,4 @@
-package com.pdharam.restaurantapp_kotlincompose
+package com.pdharam.restaurantapp_kotlincompose.restaurants.presentation.details
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -10,12 +10,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import com.pdharam.restaurantapp_kotlincompose.restaurants.domain.model.Restaurant
+import com.pdharam.restaurantapp_kotlincompose.restaurants.presentation.list.RestaurantDetails
+import com.pdharam.restaurantapp_kotlincompose.restaurants.presentation.list.RestaurantIcon
 
 @Composable
-fun RestaurantDetailsScreen(modifier: Modifier = Modifier) {
-    val viewModel: RestaurantDetailsViewModel = viewModel()
-    val item = viewModel.state.value
+fun RestaurantDetailsScreen(modifier: Modifier = Modifier, item: Restaurant?) {
+
 
     if (item != null) {
         Column(
