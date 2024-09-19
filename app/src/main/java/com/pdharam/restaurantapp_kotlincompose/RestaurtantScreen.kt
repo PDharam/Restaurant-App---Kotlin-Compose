@@ -2,9 +2,11 @@ package com.pdharam.restaurantapp_kotlincompose
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -15,6 +17,7 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,16 +39,26 @@ fun RestaurantsScreen(modifier: Modifier = Modifier, onItemClick: (id: Int) -> U
 //        viewModel.getRestaurants()
 //    }
 
-    LazyColumn(
-        contentPadding = PaddingValues(
-            vertical = 8.dp, horizontal = 8.dp
-        )
-    ) {
-        items(viewModel.state.value) { restaurant ->
-            RestaurantItem(
-                item = restaurant,
-                onFavouriteClick = { id, oldValue -> viewModel.toggleFavourite(id, oldValue) },
-                onItemClick = { id -> onItemClick(id) })
+    val state = viewModel.state.value
+
+    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+        LazyColumn(
+            contentPadding = PaddingValues(
+                vertical = 8.dp, horizontal = 8.dp
+            )
+        ) {
+            items(state.restaurants) { item: Restaurant ->
+                RestaurantItem(
+                    item = item,
+                    onFavouriteClick = { id, oldValue -> viewModel.toggleFavourite(id, oldValue) },
+                    onItemClick = { id -> onItemClick(id) })
+            }
+        }
+        if (state.isLoading) {
+            CircularProgressIndicator()
+        }
+        if (state.error != null) {
+            Text(text = state.error)
         }
     }
 
