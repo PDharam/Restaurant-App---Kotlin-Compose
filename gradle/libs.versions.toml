@@ -20,6 +20,11 @@ roomRuntime = "2.6.1"
 roomCompiler = "2.6.1"
 roomKtx = "2.6.1"
 hiltNavigationCompose = "1.2.0"
+uiTestJunit4 = "1.7.1"
+uiTestManifest = "1.7.1"
+kotlinxCoroutinesTest = "1.9.0"
+coreTesting = "1.1.1"
+coreTestingVersion = "2.2.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -47,6 +52,11 @@ androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = 
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hiltAndroid" }
 hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.ref = "hiltCompiler" }
 androidx-hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
+ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4", version.ref = "uiTestJunit4" }
+ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest", version.ref = "uiTestManifest" }
+kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
+core-testing = { group = "android.arch.core", name = "core-testing", version.ref = "coreTesting" }
+androidx-core-testing = { group = "androidx.arch.core", name = "core-testing", version.ref = "coreTestingVersion" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
