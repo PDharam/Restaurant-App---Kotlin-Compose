@@ -4,8 +4,9 @@ import com.pdharam.restaurantapp_kotlincompose.restaurants.data.data_source.loca
 import com.pdharam.restaurantapp_kotlincompose.restaurants.data.data_source.local.PartialLocalRestaurant
 import com.pdharam.restaurantapp_kotlincompose.restaurants.data.data_source.local.RestaurantDao
 import com.pdharam.restaurantapp_kotlincompose.restaurants.data.data_source.remote.RestaurantsApiService
+import com.pdharam.restaurantapp_kotlincompose.restaurants.data.di.IoDispatcher
 import com.pdharam.restaurantapp_kotlincompose.restaurants.domain.model.Restaurant
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import retrofit2.HttpException
 import retrofit2.Retrofit
@@ -18,7 +19,8 @@ import javax.inject.Singleton
 @Singleton
 class RestaurantsRepository @Inject constructor(
     private var restInterface: RestaurantsApiService,
-    private val restaurantDao: RestaurantDao
+    private val restaurantDao: RestaurantDao,
+    @IoDispatcher private val dispatcher: CoroutineDispatcher
 ) {
 
 
@@ -29,7 +31,7 @@ class RestaurantsRepository @Inject constructor(
     }
 
     suspend fun loadRestaurants() {
-        return withContext(Dispatchers.IO) {
+        return withContext(dispatcher) {
             try {
                 refreshCache()
             } catch (e: Exception) {
@@ -73,7 +75,7 @@ class RestaurantsRepository @Inject constructor(
     }
 
     suspend fun getRestaurants(): List<Restaurant> {
-        return withContext(Dispatchers.IO) {
+        return withContext(dispatcher) {
             return@withContext restaurantDao.getAll().map {
                 Restaurant(
                     id = it.id,
@@ -87,7 +89,7 @@ class RestaurantsRepository @Inject constructor(
 
 
     suspend fun toggleFavouriteRestaurant(id: Int, isFav: Boolean) {
-        return withContext(Dispatchers.IO) {
+        return withContext(dispatcher) {
             restaurantDao.update(PartialLocalRestaurant(id, isFav))
         }
     }
