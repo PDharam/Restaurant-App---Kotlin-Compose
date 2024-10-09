@@ -46,8 +46,6 @@ class RestaurantViewModelTest {
         advanceUntilIdle()
 
         val currentState = viewModel.state.value
-
-        println("ViewModelTest : Current State: ${currentState}")
         assert(
             currentState == RestaurantScreenState(
                 restaurants = DummyContent.getDummyRestaurants(),
@@ -62,10 +60,8 @@ class RestaurantViewModelTest {
         val viewModel = getRestaurantViewModel()
 
         advanceUntilIdle()
-        Thread.sleep(5000)
         val currentState = viewModel.state.value
 
-        println("ViewModelTest : Current State: ${currentState}")
         assert(
             currentState == RestaurantScreenState(
                 restaurants = DummyContent.getDummyRestaurants(),

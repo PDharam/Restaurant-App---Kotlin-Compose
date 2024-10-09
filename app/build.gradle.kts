@@ -72,6 +72,7 @@ dependencies {
     implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.ui.test.manifest)
     implementation(libs.kotlinx.coroutines.test)
+    implementation(libs.androidx.paging.compose)
     testImplementation(libs.androidx.core.testing)
     androidTestImplementation(libs.ui.test.junit4)
     kapt(libs.hilt.compiler)

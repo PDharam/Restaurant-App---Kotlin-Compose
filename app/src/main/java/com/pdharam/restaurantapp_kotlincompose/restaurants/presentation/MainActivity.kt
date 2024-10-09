@@ -10,12 +10,18 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
+import com.pdharam.restaurantapp_kotlincompose.repositories.Repository
+import com.pdharam.restaurantapp_kotlincompose.repositories.RepositoryScreen
+import com.pdharam.restaurantapp_kotlincompose.repositories.RepositoryViewModel
 import com.pdharam.restaurantapp_kotlincompose.restaurants.presentation.details.RestaurantDetailsScreen
 import com.pdharam.restaurantapp_kotlincompose.restaurants.presentation.details.RestaurantDetailsViewModel
 import com.pdharam.restaurantapp_kotlincompose.restaurants.presentation.list.RestaurantViewModel
@@ -41,7 +47,15 @@ class MainActivity : ComponentActivity() {
     fun RestaurantApp(modifier: Modifier = Modifier) {
         val navController = rememberNavController()
 
-        NavHost(navController = navController, startDestination = "restaurants") {
+        NavHost(navController = navController, startDestination = "repositoryScreen") {
+            composable(route = "repositoryScreen") {
+                val viewModel: RepositoryViewModel = viewModel()
+                val repoFlow = viewModel.repositoriesFlow
+                val lazyRepoItems: LazyPagingItems<Repository> = repoFlow.collectAsLazyPagingItems()
+
+                RepositoryScreen(repo = lazyRepoItems)
+            }
+
             composable(route = "restaurants") {
                 val viewModel: RestaurantViewModel = hiltViewModel()
 

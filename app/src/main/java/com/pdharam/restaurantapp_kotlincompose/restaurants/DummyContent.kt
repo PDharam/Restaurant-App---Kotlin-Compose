@@ -18,4 +18,7 @@ object DummyContent {
     fun getRemoteRestaurants() = getDummyRestaurants().map {
         RemoteRestaurant(it.id, it.title, it.description)
     }
+
+    fun getDomainRestaurants() = getDummyRestaurants().toMutableList()
+
 }

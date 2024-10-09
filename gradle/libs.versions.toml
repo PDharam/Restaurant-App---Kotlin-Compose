@@ -25,6 +25,7 @@ uiTestManifest = "1.7.1"
 kotlinxCoroutinesTest = "1.9.0"
 coreTesting = "1.1.1"
 coreTestingVersion = "2.2.0"
+pagingCompose = "3.3.2"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -57,6 +58,7 @@ ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest", v
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
 core-testing = { group = "android.arch.core", name = "core-testing", version.ref = "coreTesting" }
 androidx-core-testing = { group = "androidx.arch.core", name = "core-testing", version.ref = "coreTestingVersion" }
+androidx-paging-compose = { group = "androidx.paging", name = "paging-compose", version.ref = "pagingCompose" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

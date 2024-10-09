@@ -9,8 +9,6 @@ import com.pdharam.restaurantapp_kotlincompose.restaurants.domain.model.Restaura
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import retrofit2.HttpException
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import java.net.ConnectException
 import java.net.UnknownHostException
 import javax.inject.Inject
@@ -23,12 +21,6 @@ class RestaurantsRepository @Inject constructor(
     @IoDispatcher private val dispatcher: CoroutineDispatcher
 ) {
 
-
-    init {
-        val retrofit = Retrofit.Builder().addConverterFactory(GsonConverterFactory.create())
-            .baseUrl("https://fir-project-s-default-rtdb.firebaseio.com/").build()
-        restInterface = retrofit.create(RestaurantsApiService::class.java)
-    }
 
     suspend fun loadRestaurants() {
         return withContext(dispatcher) {
