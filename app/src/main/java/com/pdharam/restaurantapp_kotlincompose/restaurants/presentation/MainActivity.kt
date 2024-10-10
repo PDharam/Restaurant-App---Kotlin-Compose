@@ -52,8 +52,14 @@ class MainActivity : ComponentActivity() {
                 val viewModel: RepositoryViewModel = viewModel()
                 val repoFlow = viewModel.repositoriesFlow
                 val lazyRepoItems: LazyPagingItems<Repository> = repoFlow.collectAsLazyPagingItems()
-
-                RepositoryScreen(repo = lazyRepoItems)
+                val timerText = viewModel.timerState.value
+                RepositoryScreen(
+                    repo = lazyRepoItems,
+                    timerText = timerText,
+                    getTimer = { viewModel.timer },
+                    onPauseTimer = {
+                        viewModel.timer.stop()
+                    })
             }
 
             composable(route = "restaurants") {
@@ -68,7 +74,8 @@ class MainActivity : ComponentActivity() {
                 route = "restaurants/{restaurant_id}",
                 arguments = listOf(navArgument("restaurant_id") {
                     type = NavType.IntType
-                }), deepLinks = listOf(navDeepLink {
+                }),
+                deepLinks = listOf(navDeepLink {
                     uriPattern = "www.restaurantsapp.details.com/{restaurant_id}"
                 })
             ) { navStackEntry ->

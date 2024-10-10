@@ -12,13 +12,22 @@ import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 
 @Composable
-fun RepositoryScreen(repo: LazyPagingItems<Repository>) {
+fun RepositoryScreen(
+    repo: LazyPagingItems<Repository>,
+    timerText: String,
+    getTimer: () -> CustomCountDown,
+    onPauseTimer: () -> Unit
+) {
     LazyColumn(
         contentPadding = PaddingValues(
             vertical = 8.dp,
             horizontal = 8.dp
         )
     ) {
+
+        item {
+            CountDownItem(timerText = timerText, getTimer = getTimer, onPauseTimer = onPauseTimer)
+        }
 
         items(count = repo.itemCount) { index ->
             val item = repo[index]
